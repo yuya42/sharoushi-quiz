@@ -115,6 +115,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Hiragino Kak
 .exp-ans-badge{display:inline-block;background:var(--green);color:#fff;border-radius:6px;padding:2px 10px;font-size:13px;font-weight:700;margin-bottom:6px}
 /* No data */
 .no-data{text-align:center;padding:40px 16px;color:var(--muted)}
+/* 再開バナー */
+.resume-sec{padding:0 14px 10px}
+.btn-resume{width:100%;background:var(--white);color:var(--pink);border:2px solid var(--pink);border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-resume:hover{background:var(--pink-l)}
+.resume-info{font-size:12px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.6}
 /* 選択問題 選択肢ボックス */
 .options-box{background:#edf2ff;border:2px solid #4c6ef5;border-radius:10px;padding:12px 14px;margin-bottom:12px}
 .options-hdr{font-weight:700;font-size:12px;color:#3b5bdb;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase}
@@ -156,8 +161,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Hiragino Kak
   </div>
   <div class="tog-row"><label for="tog-shuf">シャッフル</label><button class="tog on" id="tog-shuf"></button></div>
   <div class="tog-row"><label for="tog-skip">正解済みを除外</label><button class="tog" id="tog-skip"></button></div>
+  <div class="resume-sec" id="resume-sec" style="display:none">
+    <button class="btn-resume" id="btn-resume">▶ 前回の続きから再開</button>
+    <div class="resume-info" id="resume-info"></div>
+  </div>
   <div class="home-acts">
-    <button class="btn-start" id="btn-start">スタート <span id="start-n"></span></button>
+    <button class="btn-start" id="btn-start">新しくスタート <span id="start-n"></span></button>
     <button class="btn-sub" id="btn-reset">学習記録をリセット</button>
   </div>
 </div>
@@ -234,6 +243,42 @@ const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 function getP(){try{return JSON.parse(localStorage.getItem('sr_p')||'{}')}catch{return{}}}
 function setP(p){localStorage.setItem('sr_p',JSON.stringify(p))}
 function qKey(q){return (q.chapter||'')+'_Q'+(q.questionNumber||0)}
+
+// ── セッション保存・復元 ──────────────────────────
+const SES_KEY='sr_ses';
+function saveSession(){
+  if(!S.queue.length) return;
+  localStorage.setItem(SES_KEY,JSON.stringify({
+    keys:S.queue.map(q=>qKey(q)),
+    idx:S.idx, sOk:S.sOk, sTotal:S.sTotal
+  }));
+}
+function clearSession(){ localStorage.removeItem(SES_KEY); }
+function loadSessionData(){
+  try{ return JSON.parse(localStorage.getItem(SES_KEY)||'null'); }catch{return null;}
+}
+function hasSavedSession(){
+  const d=loadSessionData();
+  return !!(d && d.keys && d.keys.length && d.idx < d.keys.length);
+}
+function resumeSession(){
+  const d=loadSessionData(); if(!d) return;
+  const qMap={};
+  (QUESTIONS||[]).forEach(q=>{ qMap[qKey(q)]=q; });
+  const queue=d.keys.map(k=>qMap[k]).filter(Boolean);
+  if(!queue.length){ clearSession(); return; }
+  S.queue=queue; S.idx=Math.min(d.idx,queue.length-1);
+  S.sOk=d.sOk||0; S.sTotal=d.sTotal||0; S.answered=false;
+  show('s-quiz'); showQ();
+}
+function updateResumeBtn(){
+  const sec=$('resume-sec');
+  if(!hasSavedSession()){ sec.style.display='none'; return; }
+  const d=loadSessionData();
+  const remaining=d.keys.length - d.idx;
+  sec.style.display='';
+  $('resume-info').textContent=`残り ${remaining} 問 ／ 全 ${d.keys.length} 問（${d.sOk}問正解）`;
+}
 
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -322,11 +367,13 @@ function startQuiz(){
   let qs=filtered(); if(!qs.length) return;
   if(S.shuffle) qs=shuffle(qs);
   S.queue=qs; S.idx=0; S.sOk=0; S.sTotal=0; S.answered=false;
+  clearSession(); saveSession();
   show('s-quiz'); showQ();
 }
 
 function showQ(){
   if(S.idx>=S.queue.length){showSum();return;}
+  saveSession();
   const q=S.cur=S.queue[S.idx]; S.answered=false;
   const pct=(S.idx/S.queue.length*100).toFixed(1);
   $('q-prog').style.width=pct+'%';
@@ -481,6 +528,7 @@ function showExp(sel){
 }
 
 function showSum(){
+  clearSession();
   const pct=S.sTotal>0?Math.round(S.sOk/S.sTotal*100):0;
   $('sum-n').textContent=S.sOk; $('sum-t').textContent='/ '+S.sTotal+' 問';
   $('sum-pct').textContent='正解率: '+pct+'%';
@@ -495,13 +543,14 @@ function init(){
     $('btn-start').disabled=true;
     return;
   }
-  buildChips(); initFilters(); updateStats();
+  buildChips(); initFilters(); updateStats(); updateResumeBtn();
   $('btn-start').onclick=startQuiz;
-  $('q-back').onclick=()=>{if(confirm('ホームに戻りますか？')){show('s-home');updateStats();}};
+  $('btn-resume').onclick=resumeSession;
+  $('q-back').onclick=()=>{if(confirm('ホームに戻りますか？（進捗は保存されています）')){show('s-home');updateStats();updateResumeBtn();}};
   $('btn-next').onclick=()=>{S.idx++;show('s-quiz');showQ();};
   $('btn-again').onclick=startQuiz;
-  $('btn-home2').onclick=()=>{show('s-home');updateStats();};
-  $('btn-reset').onclick=()=>{if(confirm('学習記録を全てリセットしますか？')){localStorage.removeItem('sr_p');updateStats();}};
+  $('btn-home2').onclick=()=>{show('s-home');updateStats();updateResumeBtn();};
+  $('btn-reset').onclick=()=>{if(confirm('学習記録を全てリセットしますか？')){localStorage.removeItem('sr_p');clearSession();updateStats();updateResumeBtn();}};
 }
 
 document.addEventListener('DOMContentLoaded',init);
