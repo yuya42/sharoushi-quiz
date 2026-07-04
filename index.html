@@ -55,9 +55,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Hiragino Kak
 .b-advanced{background:#fff3bf;color:#e67700}
 .b-ch1{background:#ffe8cc;color:#e67700}
 .topic{font-size:13px;color:var(--muted);margin-bottom:6px}
-.q-text{font-size:15px;line-height:1.8;margin-bottom:16px;padding:14px;background:var(--white);border-radius:10px;box-shadow:var(--shadow)}
+.q-text{font-size:15px;line-height:1.8;margin-bottom:16px;padding:14px;background:var(--white);border-radius:10px;box-shadow:var(--shadow);white-space:pre-wrap}
 .choices{display:flex;flex-direction:column;gap:8px}
-.choice{width:100%;text-align:left;padding:13px 14px;border-radius:10px;border:2px solid var(--border);background:var(--white);cursor:pointer;font-size:14px;line-height:1.65;transition:border-color .15s,background .15s;display:flex;gap:10px;align-items:flex-start}
+.choice{width:100%;text-align:left;padding:13px 14px;border-radius:10px;border:2px solid var(--border);background:var(--white);cursor:pointer;font-size:14px;line-height:1.65;transition:border-color .15s,background .15s;display:flex;gap:10px;align-items:flex-start;white-space:pre-wrap}
 .choice .ltr{font-weight:700;font-size:15px;min-width:18px;color:var(--pink);flex-shrink:0;margin-top:1px}
 .choice:hover:not(:disabled){border-color:var(--pink);background:var(--pink-l)}
 .choice:disabled{cursor:default}
@@ -81,7 +81,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Hiragino Kak
 .exp-item.ok{background:var(--green-l);border-left:4px solid var(--green)}
 .exp-item.ng{background:var(--red-l);border-left:4px solid var(--red)}
 .exp-hdr{font-weight:700;font-size:14px;margin-bottom:5px;display:flex;align-items:center;gap:7px}
-.exp-txt{font-size:13px;line-height:1.75}
+.exp-txt{font-size:13px;line-height:1.75;white-space:pre-wrap}
 .exp-src{font-size:11px;color:var(--muted);margin-top:5px;font-style:italic}
 .exp-hint{font-size:12px;background:var(--pink-l);color:var(--pink-d);border-radius:6px;padding:7px 9px;margin-top:7px;line-height:1.6}
 .next-bar{padding:14px;background:var(--white);border-top:1px solid var(--border)}
@@ -113,6 +113,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue','Hiragino Kak
 .btn-all-exp{width:100%;margin-top:10px;padding:13px;background:none;border:2px dashed var(--pink);border-radius:10px;color:var(--pink);font-size:14px;font-weight:700;cursor:pointer}
 .btn-all-exp:hover{background:var(--pink-l)}
 .exp-ans-badge{display:inline-block;background:var(--green);color:#fff;border-radius:6px;padding:2px 10px;font-size:13px;font-weight:700;margin-bottom:6px}
+.select-panel{background:var(--white);border-radius:10px;box-shadow:var(--shadow);padding:12px;margin-top:2px}
+.select-title{font-size:13px;font-weight:700;color:var(--pink);margin-bottom:10px}
+.select-source{background:#edf2ff;border:1px solid #bac8ff;border-radius:9px;padding:10px;margin-bottom:12px}
+.select-source-title{font-size:12px;font-weight:700;color:#3b5bdb;margin-bottom:7px}
+.select-source-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;font-size:12px;line-height:1.55}
+.select-source-item{background:#fff;border:1px solid #dbe4ff;border-radius:7px;padding:6px 7px}
+.select-group{border-top:1px solid var(--border);padding-top:10px;margin-top:10px}
+.select-group:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.select-label{font-size:13px;font-weight:700;margin-bottom:7px}
+.select-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.select-option{border:1px solid var(--border);background:var(--white);border-radius:8px;padding:8px 9px;text-align:left;font:inherit;font-size:12px;line-height:1.45;cursor:pointer;min-height:38px}
+.select-option.sel{border-color:var(--pink);background:var(--pink-l);color:var(--pink-d);font-weight:700}
+.select-option.ok{border-color:var(--green);background:var(--green-l);color:var(--green);font-weight:700}
+.select-option.ng{border-color:var(--red);background:var(--red-l);color:var(--red);font-weight:700}
+.select-option:disabled{cursor:default}
+.select-actions{display:flex;gap:8px;margin-top:12px}
+.select-submit{flex:1;border:none;border-radius:10px;background:var(--pink);color:#fff;font:inherit;font-weight:700;padding:12px;cursor:pointer}
+.select-submit:disabled{opacity:.45;cursor:not-allowed}
+.select-clear{border:1px solid var(--border);border-radius:10px;background:var(--white);color:var(--muted);font:inherit;padding:12px;cursor:pointer}
 /* No data */
 .no-data{text-align:center;padding:40px 16px;color:var(--muted)}
 /* 再開バナー */
@@ -239,6 +258,7 @@ let S = {
 
 const $ = id => document.getElementById(id);
 const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const CIRCLED = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
 
 function getP(){try{return JSON.parse(localStorage.getItem('sr_p')||'{}')}catch{return{}}}
 function setP(p){localStorage.setItem('sr_p',JSON.stringify(p))}
@@ -363,6 +383,45 @@ function shuffle(a){
   return r;
 }
 
+function selectionOptions(q){
+  const txt=q.questionText||'';
+  const i=txt.lastIndexOf('選択肢');
+  if(i<0) return [];
+  const raw=txt.slice(i).replace(/^\s*選択肢[:：]?\s*/,'').replace(/\s+/g,' ').trim();
+  const opts=[];
+  const re=/([①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])\s*([^①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳]+)/g;
+  let m;
+  while((m=re.exec(raw))){
+    const label=m[1], text=m[2].trim();
+    if(text) opts.push({label,text});
+  }
+  return opts;
+}
+
+
+function selectionSourceHtml(opts){
+  if(!opts.length) return '';
+  return '<div class="select-source"><div class="select-source-title">選択肢</div><div class="select-source-list">'+
+    opts.map(o=>'<div class="select-source-item">'+esc((o.label+' '+o.text).trim())+'</div>').join('')+
+    '</div></div>';
+}
+
+function selectionCorrect(q,blank){
+  const ca=q.correctAnswer||'';
+  const m=ca.match(new RegExp(blank+'\\s*[:：]\\s*([①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])'));
+  if(m) return m[1];
+  const allExp=['A','B','C','D','E'].map(l=>q['exp'+l+'Text']||'').join('\n');
+  const inSummary=allExp.match(new RegExp(blank+'\\s*[:：][^①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳\\n]*[（(]?([①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])'));
+  if(inSummary) return inSummary[1];
+  const txt=q['exp'+blank+'Text']||'';
+  const e=txt.match(/([①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])/);
+  return e?e[1]:'';
+}
+
+function selectionBlanks(q){
+  return ['A','B','C','D','E'].filter(l=>(q.questionText||'').includes('['+l+']')||(q.questionText||'').includes(' '+l+' ')||q['exp'+l+'Text']);
+}
+
 function startQuiz(){
   let qs=filtered(); if(!qs.length) return;
   if(S.shuffle) qs=shuffle(qs);
@@ -382,36 +441,10 @@ function showQ(){
   const ty=q.type==='択一'?'択一':'選択';
   $('q-meta').innerHTML=`<span class="badge b-ch">${esc(q.chapter||'')}</span><span class="badge ${lv}">${esc(q.level||'')}</span><span class="badge b-ch1">${esc(ty)}</span>`;
   $('q-topic').textContent=q.sectionName||'';
-  // 選択問題: questionTextから選択肢セクションを分離して表示
+  // 選択問題も原本の問題文をそのまま表示する
   const qn=$('q-notice'); qn.style.display='none'; qn.innerHTML='';
   if(q.type==='選択'){
-    const txt=q.questionText||'';
-    // "選択肢" ヘッダーがある場合は分割
-    const sepIdx=txt.search(/選択肢[\s\S]*?[\n\r]/);
-    // 丸数字（①〜⑳）の有無を確認
-    const hasCircled=/[①-⑳]/.test(txt);
-    if(sepIdx!==-1){
-      // 問題本文と選択肢を分離
-      const qBody=txt.substring(0,sepIdx).trim();
-      // "選択肢" の後の全テキスト（次の問題本文が混入している場合があるので先頭ブロックのみ取る）
-      const afterSep=txt.substring(sepIdx).replace(/^選択肢\s*/,'').trim();
-      // 選択肢ブロック: 丸数字が終わるまで（次の問題文開始 "次の" などで切る）
-      const optMatch=afterSep.match(/^([①-⑳][^\n].*?)(?:\n次の|\n[１-９]　|\n\n次の|$)/s);
-      const optText=optMatch?optMatch[1].trim():afterSep.split('\n').slice(0,3).join('\n');
-      $('q-text').textContent=qBody||txt;
-      qn.className='options-box';
-      qn.innerHTML=`<div class="options-hdr">選択肢</div><div class="options-txt">${esc(optText)}</div>`;
-      qn.style.display='';
-    } else if(hasCircled){
-      // 選択肢ヘッダーなしだが丸数字がある → そのまま全文表示
-      $('q-text').textContent=txt;
-    } else {
-      // 選択肢データ未抽出
-      $('q-text').textContent=txt;
-      qn.className='no-options-notice';
-      qn.innerHTML='⚠️ 選択肢（①〜⑳）のデータが抽出されていません。<br>テキストの選択肢欄を参照してください。';
-      qn.style.display='';
-    }
+    $('q-text').textContent=q.questionText||'';
   } else {
     $('q-text').textContent=q.questionText||'';
   }
@@ -425,39 +458,107 @@ function showQ(){
       b.onclick=()=>pick(l); cd.appendChild(b);
     });
   } else {
-    // 選択問題: 空欄ごとにタップして答えを確認するカード
-    const blanks=['A','B','C','D','E'].filter(l=>q['exp'+l+'Text']);
-    if(blanks.length){
-      const grid=document.createElement('div'); grid.className='blank-grid';
-      for(const l of blanks){
-        const ans=q['exp'+l+'Text']||'';
-        // 解答行（最初の行）だけ取り出す
-        const ansLine=ans.split('\n')[0].replace(/^[A-E][:：]\s*/,'').trim();
-        const card=document.createElement('button');
-        card.className='blank-card'; card.dataset.blank=l;
-        card.innerHTML=`<span class="b-lbl">空欄 ${l}</span><span class="b-placeholder">[ ${l} ]</span><span class="b-ans">${esc(ansLine)}</span><span class="b-tap">タップで表示</span>`;
-        card.onclick=function(){
-          if(this.classList.contains('revealed')) return;
-          this.classList.add('revealed');
-        };
-        grid.appendChild(card);
-      }
-      cd.appendChild(grid);
+    let opts=selectionOptions(q);
+    const blanks=selectionBlanks(q);
+    q._selAnswers={};
+    if(!opts.length&&blanks.length&&blanks.every(l=>selectionCorrect(q,l))){
+      opts=CIRCLED.map(label=>({label,text:''}));
+      qn.className='no-options-notice';
+      qn.innerHTML='この問題は選択肢の語句データが未抽出です。番号で回答してください。';
+      qn.style.display='';
     }
-    // 解説ページへのボタン
-    const allBtn=document.createElement('button');
-    allBtn.className='btn-all-exp';
-    allBtn.textContent='解説を見る →';
-    allBtn.onclick=()=>{
-      const p=getP(),k=qKey(q);
-      if(!p[k]) p[k]={answered:0,correct:true,checks:[false,false,false]};
-      p[k].answered++; p[k].correct=true; setP(p);
-      S.sTotal++; S.sOk++;
-      showExp(null);
-    };
-    cd.appendChild(allBtn);
+    if(opts.length&&blanks.length){
+      const panel=document.createElement('div');
+      panel.className='select-panel';
+      const title=document.createElement('div');
+      title.className='select-title';
+      title.textContent='各空欄の答えを選択してください';
+      panel.appendChild(title);
+      panel.insertAdjacentHTML('beforeend', selectionSourceHtml(opts));
+      blanks.forEach(l=>{
+        const group=document.createElement('div');
+        group.className='select-group';
+        group.innerHTML='<div class="select-label">空欄 '+l+'</div>';
+        const list=document.createElement('div');
+        list.className='select-options';
+        opts.forEach(o=>{
+          const b=document.createElement('button');
+          b.type='button';
+          b.className='select-option';
+          b.dataset.blank=l;
+          b.dataset.opt=o.label;
+          b.textContent=(o.label+' '+o.text).trim();
+          b.onclick=()=>pickSelectionOption(l,o.label);
+          list.appendChild(b);
+        });
+        group.appendChild(list);
+        panel.appendChild(group);
+      });
+      const acts=document.createElement('div');
+      acts.className='select-actions';
+      acts.innerHTML='<button class="select-clear" type="button" id="sel-clear">クリア</button><button class="select-submit" type="button" id="sel-submit" disabled>回答する</button>';
+      panel.appendChild(acts);
+      cd.appendChild(panel);
+      $('sel-clear').onclick=()=>{q._selAnswers={};refreshSelectionButtons();};
+      $('sel-submit').onclick=submitSelection;
+    } else {
+      qn.className='no-options-notice';
+      qn.innerHTML='この問題は選択肢欄の文字データが未抽出です。原本PDFの選択肢を確認してから解答・解説へ進んでください。';
+      qn.style.display='';
+      const allBtn=document.createElement('button');
+      allBtn.className='btn-all-exp';
+      allBtn.textContent='解答・解説を見る →';
+      allBtn.onclick=()=>{
+        const p=getP(),k=qKey(q);
+        if(!p[k]) p[k]={answered:0,correct:false,checks:[false,false,false]};
+        p[k].answered++; setP(p);
+        S.sTotal++;
+        showExp(null);
+      };
+      cd.appendChild(allBtn);
+    }
   }
   $('q-scroll').scrollTop=0;
+}
+
+function pickSelectionOption(blank,opt){
+  if(S.answered) return;
+  S.cur._selAnswers=S.cur._selAnswers||{};
+  S.cur._selAnswers[blank]=opt;
+  refreshSelectionButtons();
+}
+
+function refreshSelectionButtons(){
+  const q=S.cur, answers=q._selAnswers||{}, blanks=selectionBlanks(q);
+  document.querySelectorAll('.select-option').forEach(b=>{
+    b.classList.toggle('sel', answers[b.dataset.blank]===b.dataset.opt);
+  });
+  const submit=$('sel-submit');
+  if(submit) submit.disabled=!blanks.every(l=>answers[l]);
+}
+
+function submitSelection(){
+  if(S.answered) return; S.answered=true;
+  const q=S.cur, answers=q._selAnswers||{}, blanks=selectionBlanks(q);
+  const hasAnswerKey=blanks.every(l=>selectionCorrect(q,l));
+  const ok=hasAnswerKey&&blanks.every(l=>answers[l]===selectionCorrect(q,l));
+  const p=getP(), k=qKey(q);
+  if(!p[k]) p[k]={answered:0,correct:false,checks:[false,false,false]};
+  p[k].answered++;
+  if(hasAnswerKey) p[k].correct=ok;
+  setP(p);
+  S.sTotal++; if(ok) S.sOk++;
+  document.querySelectorAll('.select-option').forEach(b=>{
+    const correct=selectionCorrect(q,b.dataset.blank);
+    b.disabled=true;
+    if(hasAnswerKey&&b.dataset.opt===correct) b.classList.add('ok');
+    else if(hasAnswerKey&&answers[b.dataset.blank]===b.dataset.opt) b.classList.add('ng');
+    else if(!hasAnswerKey&&answers[b.dataset.blank]===b.dataset.opt) b.classList.add('sel');
+  });
+  const submit=$('sel-submit'), clear=$('sel-clear');
+  if(submit) submit.disabled=true;
+  if(clear) clear.disabled=true;
+  setTimeout(()=>showExp(hasAnswerKey?{ok}:null),800);
 }
 
 function pick(l){
@@ -477,7 +578,7 @@ function pick(l){
 
 function showExp(sel){
   const q=S.cur, p=getP(), k=qKey(q), pd=p[k]||{checks:[false,false,false]};
-  const ok=sel===null?null:sel===q.correctAnswer;
+  const ok=sel===null?null:(typeof sel==='object'?sel.ok:sel===q.correctAnswer);
   const banner=$('res-banner');
   if(ok===null){banner.className='res-banner info';$('res-icon').textContent='📖';$('res-txt').textContent='解説';$('res-ans').textContent=q.correctAnswer?'正解: '+q.correctAnswer:'';}
   else if(ok){banner.className='res-banner ok';$('res-icon').textContent='⭕';$('res-txt').textContent='正解！';$('res-ans').textContent='';}
@@ -509,6 +610,7 @@ function showExp(sel){
     }
     for(const l of blanks){
       const raw=q['exp'+l+'Text']||'';
+      if(!raw) continue;
       // 最初の行=解答、残り=解説
       const lines=raw.split('\n');
       const ansLine=lines[0].replace(/^[A-E][:：]\s*/,'').trim();
@@ -517,9 +619,9 @@ function showExp(sel){
       d.innerHTML=`<div class="exp-hdr">空欄 ${l}</div><div style="margin-bottom:4px"><span class="exp-ans-badge">${esc(ansLine)}</span></div>${expTxt?`<div class="exp-txt">${esc(expTxt)}</div>`:''}`;
       es.appendChild(d);
     }
-    if(!blanks.length){
+    if(!es.children.length){
       const d=document.createElement('div'); d.className='exp-item ok';
-      d.innerHTML=`<div class="exp-txt">${esc(q.questionText||'')}</div>`;
+      d.innerHTML='<div class="exp-txt">この問題は解答・解説データが未抽出です。</div>';
       es.appendChild(d);
     }
   }
